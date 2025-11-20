@@ -1,0 +1,1023 @@
+import React, { useState, useRef, useEffect } from 'react';
+import { Send, FileText, Loader2, Book, AlertCircle } from 'lucide-react';
+
+// Knowledge base - embedded document content
+const KNOWLEDGE_BASE = `
+# Ivy Tech Community College Advising Knowledge Base
+
+## Document 1: Advising Cheat Sheet
+${`Advising Site: https://www.canva.com/design/DAGoG5JB5SU/19Jtjd1axSO-UekR0NZNxg/view
+Registration Readiness Checklist: https://docs.google.com/document/d/1eCXYoxmoWJ-eC0m2vrP2xQctVU0H2VUi9xikhB5zpWY
+
+Degree Definitions:
+- Certificate (CT): 9-27 credit hours, industry focused, 6 months
+- Technical Certificates (TC): Workforce preparation with further training
+- Associate of Science (AS): Two year degree with General Education Requirements
+- Transfer Single Articulation Pathway (TSAP): Two year degree for seamless transfer to specific bachelor's degree
+- Associate of Applied Science (AAS): Two year degree for career preparation
+
+Key Systems:
+- Catalog: https://catalog.ivytech.edu/ - Search degrees and course descriptions
+- SSB (Student ID Selection): View schedules, transcripts, test scores, holds
+- Degree Completion Tracker: Run audits for current/what-if programs
+- Change of Program: https://apps.ivytech.edu/apps/ext/program_change/
+- Schedule Builder: https://ivytech.collegescheduler.com/admin/LogOut.aspx
+
+Prerequisites for MATH and ENGL:
+- High School GPA 2.6+ within 4 years qualifies
+- Test scores: ACT, SAT, PSAT accepted
+- Knowledge Assessments available
+
+Knowledge Assessment Scores:
+- English 70+: ENGL 111 qualification
+- Math QR 55+: MATH 123
+- Math Tech 55+: MATH 122  
+- Math STEM 70+: MATH 135, 136, 137, 200
+- Math Calc 95+: MATH 201+
+
+Change of Enrollment Form: Use for Add, Drop, Withdraw via DocuSign
+Late Adds: 2nd 8-week classes need form for pre-req fulfillment
+
+IvyOnline Late Adds:
+- Green: Auto approved within 4 days, GPA 2.0+
+- Yellow: 5-6 days review, GPA 2.0+
+- Red: Auto deny 7+ days or GPA under 2.0`}
+
+## Document 2: Financial Aid & SAP FAQ
+${`Satisfactory Academic Progress (SAP) Standards:
+- GPA Requirement: Minimum 2.0 cumulative
+- Completion Rate: 67% of attempted hours must be completed
+- Maximum Timeframe: Cannot exceed 150% of program credits
+
+SAP Evaluation: End of each semester after grades posted
+
+SAP Status Progression:
+- Warning/Alert: One semester to improve, aid continues
+- Terminated: Failed to meet standards after warning
+
+Appeals Process:
+- Written explanation required
+- Supporting documentation needed
+- Academic improvement plan required
+- For completion rate/GPA: pay out of pocket, file appeal
+- For max timeframe: recalculation possible with prior non-stacking completion
+
+Withdrawals Impact:
+- Counted as attempted hours
+- Not counted as earned hours
+- Affects 67% completion rate
+
+Incompletes (I):
+- Counted as attempted
+- Not earned until completed
+- If grade posted within 30 days of SAP run, updates
+- After 30 days, SAP stands as is
+
+Transfer Credits:
+- Count after transferred in and SAP runs
+- Processed in semester they were transferred
+
+SAP Recalculation:
+- Occurs when student completes a degree
+- Does not reset to zero, recalculates timeframe`}
+
+## Document 3: Direct Links
+${`Key System URLs:
+- Degree Completion Tracker: https://dct-prod.ivytech.edu/selfservice/general/home.html
+- Student ID Main: https://banprd-ssb.ivytech.edu/BANNER/twbkwbis.P_GenMenu
+- Ivy Advising: https://ivytech.starfishsolutions.com/starfish-ops/
+- Program Change: https://apps.ivytech.edu/apps/ext/program_change/
+- SAP Appeal: https://apps.ivytech.edu/apps/ext/sap/advisor/
+- Course Inventory: https://banprd-ssb.ivytech.edu/BANNER/bwckgens.p_proc_term_date
+- C.O.R: https://wwwapps.ivytech.edu/cgi-bin/cor3/gpcourse_list.cgi`}
+
+## Document 4: Go To List for Faculty
+${`Key Contacts:
+- Transfer IN: Christina Main, Registrar
+- Transfer OUT: David Haynes, Transfer Coordinator/Advising Director
+- Schedule Builder: Teresa Kelly, Faculty Advising Liaison
+- IvyConnect: Teresa Kelly
+- SAP Appeals: Angela Horak
+- Degree Completion Tracker: Jeannie Hamblin-Fox, VC of Completions
+
+Course Repeats:
+- 2nd attempt: Register normally
+- 3rd attempt: Request form to David Haynes via DocuSign
+- 4th+ attempts: Request form to Qiana Clemens via DocuSign
+
+Holds Resolution:
+- AR Holds: muncie-bursar@ivytech.edu
+- Academic Dismissal: DocuSign form F1-Other-Academic Standing Appeal
+- Registration Hold: Records Team
+- Unsure: Christina Main, Registrar
+
+Financial Aid Contacts:
+- Karen Riddle, Enrollment Specialist Lead
+- Jamie Dick, Enrollment Specialist
+- Email: muncie-finaid@ivytech.edu
+
+Transcripts:
+- Send to Ivy Tech: transcripts@ivytech.edu
+- Request from Ivy Tech: MyIvy portal
+
+Veterans Services: muncie-veteransaffairs@ivytech.edu
+Disability Services: Cindy Miller, Keayra Hamby`}
+
+## Document 5: Common Advising Themes & Strategies
+${`Course Scheduling Strategies:
+- Use degree maps and program checklists (One Sheets)
+- Visual tools for prerequisites and sequencing
+- Balance full-time vs part-time based on commitments
+- Identify online, hybrid, evening options
+- Train students on MyIvy scheduling tools
+
+Financial Aid Support:
+- Simplify terminology (FAFSA, SAP, Pell Grant)
+- Promote early FAFSA completion
+- Explain link between completion and aid continuation
+- Highlight scholarships, grants, work-study
+
+Changing Majors Process:
+1. Discuss career goals and interests
+2. Use career assessments (My Career Path)
+3. Evaluate academic impact on credits, aid, timeline
+4. Outline transition process with checklist
+5. Confirm goal alignment
+
+SMART Goals Framework:
+- Specific, Measurable, Achievable, Relevant, Time-Bound
+- Map out semester-by-semester milestones
+- Regular follow-up appointments
+- Highlight achievements to build confidence
+
+Advising Competencies:
+- Conceptual: Understanding theories and frameworks
+- Informational: Knowledge of policies and requirements
+- Relational: Building trust and rapport
+
+Strengths-Based Approach:
+- Focus on student strengths vs problems
+- Build confidence and resilience
+- Guide students to leverage their attributes
+
+Interactive/Flipped Advising:
+- Students review materials before meetings
+- Dynamic, discussion-based sessions
+- Active student involvement
+
+Equity in Advising:
+- Diverse advisory team
+- Cultural responsiveness training
+- Targeted outreach programs
+- Proactive support measures`}
+
+## Document 6: Transferring Courses Policy (01.06.00)
+${`Transfer Credit Policy:
+- Accepts Indiana Core Transfer Library (CTL) courses automatically
+- Requires "C-" or better grade
+- Must be from accredited institutions
+
+Accepted Accreditors:
+- Middle States Commission on Higher Education
+- New England Association of Schools and Colleges
+- Higher Learning Commission
+- Northwest Commission on Colleges and Universities
+- Southern Association of Colleges and Schools
+- Western Association Accrediting Commissions
+
+Residency Requirement:
+- Minimum 15 credits earned at Ivy Tech
+- For certificates under 30 hours: 50% minimum
+- Must be earned as regular student, not transfer/test-out
+
+Evaluation Process:
+- Official transcript sent to Registrar
+- Registrar evaluates against degree audit system
+- Department reviews non-CTL courses
+- Transfer credit posted to student record
+- Does not affect GPA, counts as earned hours
+
+Course Substitution:
+- Outdated technical courses may not fulfill requirements
+- Student may need to demonstrate competency
+
+ATMAE Accreditation:
+- Minimum 12 semester hours of management/technical work required in system`}
+
+## Document 7: Reverse Transfer Policy (01.06.01)
+${`Reverse Transfer Degrees:
+- Associate of Science (AS)
+- Associate of Arts (AA)
+- Associate of General Studies (AGS)
+- Associate of Fine Arts (AFA)
+- AAS for Healthcare Specialist (Ottawa University)
+
+Eligibility Requirements:
+- Minimum 15 credits transferred to partner institution
+- Total 75 credits earned among all institutions
+- Minimum 15 credits at Ivy Tech (excluding prior learning)
+- Meet all graduation requirements including GPA
+
+Process:
+- Student or partner institution submits transcripts
+- Credits entered into SIS
+- Degree audit run based on hierarchy:
+  1. Student's Ivy Tech/partner program
+  2. AA/AS in Liberal Arts
+  3. AGS in General Studies
+- Degree posted to next graduation date
+- Diploma ordered if no outstanding fees
+
+300-Level Coursework:
+- May substitute for degree requirements
+- Can substitute for capstone course
+
+Management:
+- Central Office handles AS, AA, AGS, AFA
+- Regions handle AAS with VCAA approval`}
+
+## Document 8: Credit for Prior Learning (01.07.00)
+${`Prior Learning Assessment Types:
+
+1. Transfer Credit:
+- From accredited institutions
+- Grade "C-" or better
+- Evaluates within first term
+
+2. Credit by Examination:
+- CLEP: College-Level Examination Program
+- DSST: Dantes Subject Standardized Test
+- AP: Advanced Placement
+- IB: International Baccalaureate
+- CI: Cambridge International
+- ITCE: Ivy Tech Credit by Examination
+
+3. Educational Credit for Training/Certification:
+- Workforce certifications on crosswalk
+- No fee for credit awarded
+
+4. Prior Learning Portfolio:
+- Technical coursework only (not gen ed)
+- Must be degree-seeking and enrolled
+- $50 fee per course evaluation
+- Developed with Program faculty
+- Requires CPL Coordinator approval
+
+Residency Requirement Same:
+- 15 credits minimum at Ivy Tech
+- 50% for certificates under 30 hours
+
+Recording:
+- "V" (Verified Competency) on transcript
+- Included in earned hours
+- Does not affect GPA
+- Not counted for financial aid
+
+Restrictions:
+- Request before registering for course
+- One test attempt per course (re-test needs VCAA approval)
+- Cannot duplicate previous college credit
+- Must meet course prerequisites`}
+
+## Document 9: Establishing Program of Study (01.11.00)
+${`Catalog Year Policy:
+- Follows catalog when program declared
+- Remains in effect if attendance not discontinued 6+ semesters
+- Six consecutive semesters = 2 years (summer, fall, spring)
+- Readmission after 6 semesters = new catalog year applies
+
+Curriculum Changes:
+- Student may complete under old or new curriculum
+- Must complete old curriculum within 2 years
+- After 2 years, new curriculum required
+
+Program Elimination/Suspension:
+- No new students allowed upon approval
+- Current students notified
+- Curriculum available for 2 years
+- After 2 years, moved to non-degree seeking
+- Must see advisor for new program
+- Alternative: transfer to campus offering program
+
+Change of Program:
+- Must complete Change of Program form
+- Updates catalog year in system
+- Reflects new curriculum rules`}
+
+## Document 10: Course Repeat, Drop and Add (03.02.00)
+${`Course Repeat Policy:
+- May repeat once (2 attempts total)
+- Third attempt: VCAA approval required
+- Fourth+ attempt: VCAA approval required
+- Withdrawal counts as attempt
+
+Drop Policy (Effective Spring 2022):
+- Can drop with no transcript record until 100% refund period ends
+- 100% refund period by term length:
+  * 16 week: 14 calendar days / withdraw by week 12
+  * 12 week: 10 calendar days / withdraw by week 9
+  * 10 week: 8 calendar days / withdraw by week 7
+  * 8 week: 8 calendar days / withdraw by week 6
+  * 4 week: 4 calendar days / withdraw by week 3
+  * Under 4 week: 1 calendar day / 75% of term
+
+Non-Payment Drop:
+- Students not in paid/arranged-to-pay status dropped
+- Can re-register without approval until midnight before first session
+- After that: instructor/designee approval required
+- IvyOnline: separate reinstatement form required
+
+Adding Courses:
+- Can enroll until midnight before first session
+- Online courses: first session is first day of term
+- Section changes after first meeting: instructor and VCAA approval
+
+Same POT Drop/Add:
+- After 100% refund: can drop to take same course in same POT
+- Different POT: must withdraw (incurs charges)
+- Exception requests: petition VCES`}
+
+## Document 11: Grade Appeals (04.18.00)
+${`Grade Appeal Process:
+Timeline: Within 30 days of receiving grade
+
+Step 1: Meet with Instructor
+- Discuss issue with grade-issuing instructor
+- Most issues resolved at this level
+
+Step 2: Supervisor Appeal
+- If unresolved, written appeal to instructor's supervisor
+- Supervisor may be program chair, department chair, or dean
+- Can appeal up chain unless next person is CAO
+
+Step 3: Appeal Committee
+- Written notification to Vice Chancellor for Academic Affairs
+- Committee composition:
+  * Faculty from program's school
+  * Faculty from different school
+  * VC for Student Success or designee
+  * VC for Academic Affairs
+  * Optional fifth campus person (possibly staff)
+- Committee decision forwarded to student
+
+Step 4: Final Appeal
+- If not satisfied, appeal to campus chancellor
+- This is final decision
+
+Policy Purpose:
+- Protect student rights and interests
+- Protect academic integrity
+- Ensure due process for faculty and students`}
+
+## Document 12: Standards of Progress (04.19.00)
+${`Note: Policy phased out Fall 2019 as Financial Aid SAP and Academic Standing separated.
+
+Historical Standards:
+- Minimum cumulative GPA: 2.0
+- Completion Rate: 67%+ of attempted courses
+- Maximum Timeframe: Within 150% of program credits
+
+Status Levels (Historical):
+1. Good Standing: Meets all standards
+2. Warning: Failed one+ standards, one term to improve, aid continues
+3. Terminated: Failed after warning, no aid, cannot re-enroll
+4. Probation: Appeal approved, aid continues, interventions required
+5. Academic Restriction: Appeal approved, no aid, can self-pay after one semester
+6. Academic Dismissal: Not allowed to enroll minimum one semester
+
+Academic Restriction Requirements:
+- Meet with advisor, update ACP
+- Limited to 6 credits per term minimum 2 semesters
+- Repeat failed courses when possible
+- Achieve term GPA 2.0+
+
+Probation Requirements:
+- Complete all enrolled courses
+- "C" or better in all courses
+- Comply with ACP
+- Complete one mandated intervention
+
+Note: See current policies 04.31.00 (Academic Standing) and separate SAP policies.`}
+
+## Document 13: Health Sciences Progression (04.19.01)
+${`Policy for Clinical/Externship/Practice-Based Programs:
+
+Unsuccessful Attempt:
+- Must re-enroll in failed course next term when offered (if space)
+- Can remain in program for courses with prerequisites met
+- Failure to re-enroll may require starting program over
+
+Retained Competency Required:
+- Any term of non-enrollment requires demonstration
+- Methods: final exams, lab exams, skill checkoffs
+- If unable to demonstrate: remediation plan or repeat prerequisite
+- Contact program chair in writing before desired re-enrollment
+- Sufficient time needed before term starts
+
+Stop-Outs:
+- Not enrolled in any program courses = stop-out
+- Must request re-enrollment within maximum timeframe
+- If no accreditor timeframe: within one calendar year
+- Requests considered based on available cohort space
+
+Re-enrollment Requirements:
+- Criminal background check (initial or updated)
+- Drug/alcohol screening
+- Physical/immunization requirements
+- Compliance with any new requirements
+- Resolution of all holds
+
+Purpose:
+- Ensure retained competency
+- Maintain safety in clinical settings
+- Promote student retention and completion`}
+
+## Document 14: Course Substitution (04.24.00)
+${`Course Substitution Policy:
+
+Limits:
+- Maximum 20% of total program credit hours
+- May exceed 20% for significant curriculum changes
+- Must maintain program integrity
+
+Approval Process:
+- Program chair recommends
+- Campus Academic Officer or designee approves
+- Case-by-case basis
+- Course substitution form required
+
+Valid Reasons:
+- Completed higher-level course than prescribed (excluded from 20% limit)
+- Required course cancelled in final term
+- MATH 122/123 may substitute for MATH 118 (grade substitution applies)
+- IVYT 111-116 may substitute for IVYT 101 (grade substitution applies)
+- Previously completed college degree: IVYT awarded as verified competency
+
+Procedure:
+- Chair completes substitution form
+- Lists required course and approved substitution
+- Rationale for how substitute meets competencies
+- Routes for required signatures
+- Registrar processes on degree audit
+- Must notify Registrar 2 weeks before graduation term end
+
+Discipline Course Changes:
+- New course prefixes require taking new prefix
+- No substitution between prefixes within discipline
+
+Special Cases:
+- MATH 122/123 for MATH 118: No form required
+- IVYT verified credit: No form required`}
+
+## Document 15: Degree/Certificate Completion (04.25.00)
+${`Formal Awards:
+- Associate of Science (AS)
+- Associate of Arts (AA)
+- Associate of Applied Science (AAS)
+- Associate of Fine Arts (AFA)
+- Associate of General Studies (AGS)
+- Technical Certificate (TC)
+- Certificate (CT)
+
+Official Conferral Dates:
+- End of fall, spring, summer terms
+- Census date: 30 days after term end
+- Late posting may affect financial aid, compliance
+
+Degree/TC Requirements:
+- Complete all program courses
+- Minimum 2.0 cumulative GPA
+- Required number of credits
+- Meet residency requirement (15 credits minimum, 50% for certificates under 30 hours)
+- Meet program accreditation standards
+- For Statewide Transfer Gen Ed Core TC: 2.0 in credential courses
+- For Honors Statewide Transfer Gen Ed Core TC: 3.0 in credential courses
+
+Certificate Requirements:
+- Complete all program courses
+- Minimum 2.0 cumulative GPA
+- Required credits
+- Meet residency requirement
+- Meet accreditation standards
+
+Financial Obligations:
+- Degree conferred even with outstanding fees
+- No transcript or diploma until fees satisfied
+
+Multiple Degrees/Certificates:
+- Associate/TC: 15 additional credits required per additional degree
+- TC: 9 additional credits required per additional TC
+- Certificates: No additional credits required
+- Credits must apply to additional credential
+- Cannot reuse credits from previous credential
+- Concurrent or consecutive completion allowed
+
+Restrictions:
+- Cannot earn both AA/AS in Liberal Arts AND AGS
+- Some programs too similar to earn both
+
+Application Process:
+- Complete application to participate in commencement
+- Degree noted on transcript regardless of participation
+- Outstanding fees checked before diploma order
+
+Degree Award Campus:
+- Last campus where student was admitted (if attended multiple sites)`}
+
+## Document 16: Academic Standing (04.31.00)
+${`Current Academic Standing Policy (Effective Fall 2018):
+
+Required Standard:
+- Minimum 2.0 cumulative GPA
+- Applies to all degree/certificate-seeking students
+
+Status Levels:
+
+1. Good Standing:
+- Cumulative GPA 2.0 or higher
+
+2. Academic Monitoring:
+- Failed to attain cumulative GPA 2.0
+
+3. Academic Monitoring Continued:
+- On monitoring + failed cumulative 2.0 BUT attained term GPA 2.0
+- Remains until good standing restored
+
+4. Academic Dismissal:
+- On monitoring/monitoring continued/reinstatement + failed term AND cumulative 2.0
+- Dropped from future coursework
+- Must meet with advisor for eligibility determination
+- If approved: placed in academic reinstatement
+- If not approved: sit out one 16-week semester (Fall or Spring)
+- Can appeal denial to VCAA or designee
+
+5. Academic Reinstatement:
+- After dismissal, met with advisor, approved to re-enroll
+- Advising hold placed on record
+- Term GPA below 2.0: returns to dismissal
+- Remains until good standing restored
+- Must create Academic Completion Plan (ACP)
+
+Suggested Interventions:
+- Meet with advisor, reevaluate program, update ACP
+- Change to part-time enrollment
+- Repeat failed courses when possible
+
+Evaluation:
+- End of every term
+- Status applies regardless of campus
+- Home campus manages process
+
+Academic Completion Plan (ACP):
+- Individualized academic plan
+- Life, career, degree goals
+- Assessment scores
+- Required remediation
+- Course sequencing through completion
+- Stored in Degree Completion Tracker`}
+
+## Document 17: Initial Placement Chart
+${`Knowledge Assessment Placement:
+
+WRITING/ENGLISH:
+- ENGL 093/073: KA Read Write <70
+- ENGL 095/075: KA Read Write <70 (specific score combinations)
+- ENGL 111: KA Read Write 70+
+
+READING:
+- ENGL 083/063: KA Read Write <70
+- Program Ready: KA Read Write 70+
+
+FOUN 071:
+- KA Read Write <70 AND/OR KA TECH <55
+
+MATHEMATICS:
+- MATH 080: KA QR <55
+- MATH 023: KA STEM <50
+- MATH 122: KA TECH 55+
+- MATH 123: KA QR 55+
+- MATH 100/043: KA STEM 50-69
+- MATH 135/136/137/141/200: KA STEM 70+
+- MATH 201/211/213/218/221: KA Calculus 95+
+
+Test Score Alternatives (valid 4 years):
+- ACT, SAT, PSAT accepted
+- High school GPA 2.6+ (Core 40/Honors diploma, within 4 years)
+- ACCUPLACER scores accepted
+- AP test scores
+
+Ivy Honors Program Admission:
+Direct Admit:
+- Math: SAT 550+, ACT 24+, or equivalent
+- Language: SAT ERW 500+, ACT Reading/Writing 22+, or equivalent
+- GPA: 3.5+, fewer than 24 college credits
+
+Potentially Good Fit:
+- Math: SAT 500+, ACT 18+, or equivalent
+- Language: SAT ERW 460+, ACT Reading 18+/Writing 17+, or equivalent
+- GPA: 3.0+, fewer than 30 college credits
+
+ESOL Placement:
+- ESOL 005-006: Beginning/PreAcademic (score ranges 0-55)
+- ESOL 041-043: Reading I-III (scores 56-120)
+- ESOL 051-053: Listening/Speaking I-III (scores 50-120)
+- ESOL 061-063: Grammar/Structure I-III (scores 56-120)
+- ESOL 071-073: Writing I-III (scores 56-120)
+- ESOL 081-083: Academic English levels (scores 56-120)`}
+
+## Document 18: Registration Readiness Checklist
+${`Steps for Registration Readiness:
+
+1. Application to College (7-10 days processing)
+Required for:
+- High School Dual Credit students graduating
+- Students absent 6+ consecutive semesters
+- Guest students becoming degree-seeking
+
+Receive:
+- Acceptance letter
+- Student C#
+- Next steps
+
+Check SGASTDN in Banner for student type
+
+2. Set Up MyIvy Account
+
+3. Transfer Credits (7-14 business days)
+- Official transcripts directly from college/university
+- Email: transcripts@ivytech.edu
+- Mail: Ivy Tech, Transcript Processing, 9301 E. 59th St, Indianapolis 46216
+- Processed by Student Records hub
+
+Banner checks:
+- SOAPCOL: Transcript received date, official checked, reviewed date
+- SHATERM: View transfer courses and ITCC courses
+
+4. Assessment
+Check SOATEST for test scores
+
+Acceptable scores/waivers:
+- ACT, SAT, PSAT scores
+- HS GPA 2.6+ within 4 years (Core 40 or higher)
+- AP test scores
+- Transfer credit
+- Can start at lowest remedial level
+- Knowledge Assessment if needed
+
+5. SAP Status
+Check ROASTAT for good SAP standing
+If terminated: refer to SAP Specialist Angela Horak for appeal documentation
+
+6. Holds
+Check SOAHOLD for holds:
+- AR Holds → Bursar
+- Advising Holds → Records
+- Records Holds → Records only
+- ID Verification/Fraud → Karen Riddle or Jamie Dick
+- TM (Academic Dismissal) → Primary Advisor
+- Other holds → Check SPACMNT notes, Records, placement source
+
+7. FAFSA
+Check ROARMAN for submission
+Not required to register but recommended
+
+8. Assign Academic Advisor
+Student now advising-ready!`}
+
+## Document 19: Template Emails
+${`Knowledge Assessment Email:
+Subject: Knowledge Assessment Required
+
+"Hello, [Student].
+You need to take the Knowledge Assessment for placement into your math course.
+[Link to instructions through MyIvy dashboard]
+
+[Specify required KA and score]:
+- English 70+: ENGL 111 and most courses
+- Math QR 55+: MATH 123, ACCT, BUSN, ECON, APHY
+- Math Tech 55+: MATH 122 (AMEAS programs)
+- Math STEM 70+: MATH 135/136/137/200, BIOL, CHEM, PHYS
+- Math Calc 95+: MATH 201+
+
+KA Keys: ENGLISH, QR, TECH, STEM, KACalculus
+
+Problems accessing? Submit helpdesk ticket with C#, campus, issue."
+
+Midterm Check-in:
+"Hello, [Student].
+This 8-week term is half over. Checking in on your progress and questions.
+If not registered for next semester, make appointment via Ivy Connect.
+
+Resources:
+- Tutoring: Campus Tutoring Services on MyIvy
+- Ivy Cares: MyIvy resources"
+
+Away Message:
+"Out of office until [date]. Delayed responses.
+For immediate assistance:
+[Dean contact info]
+[Department contact if applicable]
+
+Other contacts:
+- Financial Aid: muncie-finaid@ivytech.edu, 765-289-2291 ext 1235/1230
+- Bursar: muncie-bursar@ivytech.edu, 765-289-2291 ext 1247/1248
+- General: askmuncie@ivytech.edu"
+
+FA Ineligible:
+"Hello, [Student].
+You're registered for a course outside financial aid eligibility.
+Reasons: too many attempts, doesn't align with program.
+Schedule appointment via MyIvy to discuss options."
+
+Failing Course/Prerequisites Not Met:
+"Hello, [Student].
+You're not passing a current course that's a prerequisite for a future registered course.
+If you cannot pass this term, we need to meet to discuss next semester options.
+Schedule appointment via MyIvy."`}
+
+## Document 20: Why Do We Advise Like This?
+${`Research-Based Advising Practices:
+
+Comprehensive Advising Systems:
+- Holistic approach integrating academic and non-academic resources
+- Identify and bridge gaps in student support
+- Map services for diverse student needs
+- Collaborative efforts across departments
+- Strategic planning for service cohesiveness
+
+Advisor-Student Relationships:
+- Sustained, meaningful relationships impact outcomes
+- Assign dedicated advisors throughout college journey
+- Encourage frequent, personalized contact
+- Reduce advisor caseloads for quality interactions
+- Appreciative Advising Framework: focus on strengths, aspirations, progress
+
+Mentoring and Coaching:
+- Complements advising for specific needs
+- Mentors provide experience-based insights
+- Coaches emphasize goal-setting and development
+- Clear role definitions aligned with advising
+- Cultural responsiveness and inclusivity training essential
+- Various modes to meet student preferences
+
+Positive Incentives:
+- Encourage engagement and persistence
+- Select incentives resonating with needs (scholarships, early registration)
+- Equitable allocation vital
+- Balance with core advising functions
+- Maintain focus on strengths-based approach
+
+Technology in Advising:
+- Data-driven insights and efficiencies
+- Personalized advising maintaining human connection
+- Identify at-risk students, tailor interventions
+- Early-alert systems, learning management interfaces
+- Systematic tracking of performance and needs
+- Strategic time and resource allocation
+
+Advising Competencies:
+- Conceptual: theories and frameworks
+- Informational: institutional history, degree requirements, policies
+- Relational: inclusive communication, building rapport
+- Continuous professional development
+- Trust and openness essential
+
+Strengths-Based Approach:
+- Shift from problem-focused to strengths-focused
+- Highlight inherent strengths
+- Leverage attributes toward goals
+- Particularly beneficial for first-year students
+- Build confidence and resilience
+- Foster self-efficacy
+
+Interactive Experiences (Flipped Advising):
+- Transform traditional advisory roles
+- Enhance student participation
+- Content delivery outside sessions
+- Dynamic, discussion-based meetings
+- Students prepare by reviewing materials
+- Targeted sessions addressing specific concerns
+- Active involvement, deeper understanding
+
+Access and Equity:
+- Equitable access for diverse populations
+- Diverse advisory team reflecting student body
+- Cultural responsiveness training
+- Address varied experiences and backgrounds
+- Proactive measures: targeted outreach, support programs
+- Inclusive environment for all students
+
+Case Studies:
+- CUNY Accelerated Study: comprehensive advising, strong mentorship
+- Substantial improvements in completion rates
+- Intentional program design and management
+- Overcome socioeconomic barriers
+- Replicate effective strategies
+- Learn from successful frameworks`}
+`;
+
+const App = () => {
+  const [messages, setMessages] = useState([
+    {
+      role: 'assistant',
+      content: 'Welcome to the Ivy Tech AI Advising Assistant! I can help answer questions about advising policies, procedures, financial aid, course registration, and more. Ask me anything about Ivy Tech advising resources.'
+    }
+  ]);
+  const [input, setInput] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!input.trim() || isLoading) return;
+
+    const userMessage = input.trim();
+    setInput('');
+    setMessages(prev => [...prev, { role: 'user', content: userMessage }]);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          model: 'claude-sonnet-4-20250514',
+          max_tokens: 4096,
+          system: `You are an AI advising assistant for Ivy Tech Community College. Your role is to help students, faculty, and advisors find information from the official advising documentation.
+
+CRITICAL INSTRUCTIONS:
+1. Always cite your sources using document numbers (e.g., "According to Document 1: Advising Cheat Sheet..." or "Document 16: Academic Standing states...")
+2. Be specific and accurate - quote exact policies when relevant
+3. If information isn't in the knowledge base, say so clearly
+4. Provide actionable guidance with links, contact information, and specific steps
+5. Be helpful, professional, and student-focused
+
+Here is the complete knowledge base you must reference:
+
+${KNOWLEDGE_BASE}
+
+When answering questions:
+- Search through all documents for relevant information
+- Cite which document(s) you're referencing
+- Provide direct quotes for policies when helpful
+- Include relevant links, contact emails, and phone numbers
+- Synthesize information from multiple documents when needed
+- If a policy has changed or been updated, note the effective date`,
+          messages: [
+            { role: 'user', content: userMessage }
+          ]
+        })
+      });
+
+      const data = await response.json();
+      
+      if (data.error) {
+        throw new Error(data.error.message || 'API request failed');
+      }
+
+      const assistantMessage = data.content
+        .filter(block => block.type === 'text')
+        .map(block => block.text)
+        .join('\n');
+
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: assistantMessage || 'I apologize, but I encountered an error processing your request.' 
+      }]);
+    } catch (error) {
+      console.error('Error:', error);
+      setMessages(prev => [...prev, { 
+        role: 'assistant', 
+        content: `I apologize, but I encountered an error: ${error.message}. Please try again.`
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-screen bg-gradient-to-br from-red-50 to-gray-50">
+      {/* Header */}
+      <div className="bg-gradient-to-r from-red-600 to-red-700 text-white shadow-lg">
+        <div className="max-w-5xl mx-auto px-4 py-6">
+          <div className="flex items-center gap-3">
+            <Book className="w-8 h-8" />
+            <div>
+              <h1 className="text-2xl font-bold">Ivy Tech AI Advising Assistant</h1>
+              <p className="text-red-100 text-sm">Ask questions about advising policies, procedures, and resources</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Messages */}
+      <div className="flex-1 overflow-y-auto px-4 py-6">
+        <div className="max-w-4xl mx-auto space-y-6">
+          {messages.map((message, index) => (
+            <div
+              key={index}
+              className={`flex gap-3 ${
+                message.role === 'user' ? 'justify-end' : 'justify-start'
+              }`}
+            >
+              {message.role === 'assistant' && (
+                <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+                  <FileText className="w-5 h-5 text-white" />
+                </div>
+              )}
+              <div
+                className={`rounded-lg px-4 py-3 max-w-3xl ${
+                  message.role === 'user'
+                    ? 'bg-red-600 text-white'
+                    : 'bg-white border border-gray-200 shadow-sm'
+                }`}
+              >
+                <div className="prose prose-sm max-w-none">
+                  {message.content.split('\n').map((line, i) => (
+                    <p key={i} className={message.role === 'user' ? 'text-white' : 'text-gray-800'}>
+                      {line}
+                    </p>
+                  ))}
+                </div>
+              </div>
+              {message.role === 'user' && (
+                <div className="w-8 h-8 rounded-full bg-gray-600 flex items-center justify-center flex-shrink-0">
+                  <span className="text-white text-sm font-medium">You</span>
+                </div>
+              )}
+            </div>
+          ))}
+          
+          {isLoading && (
+            <div className="flex gap-3 justify-start">
+              <div className="w-8 h-8 rounded-full bg-red-600 flex items-center justify-center flex-shrink-0">
+                <FileText className="w-5 h-5 text-white" />
+              </div>
+              <div className="bg-white border border-gray-200 rounded-lg px-4 py-3 shadow-sm">
+                <div className="flex items-center gap-2 text-gray-600">
+                  <Loader2 className="w-4 h-4 animate-spin" />
+                  <span>Searching knowledge base...</span>
+                </div>
+              </div>
+            </div>
+          )}
+          
+          <div ref={messagesEndRef} />
+        </div>
+      </div>
+
+      {/* Input */}
+      <div className="border-t border-gray-200 bg-white shadow-lg">
+        <div className="max-w-4xl mx-auto px-4 py-4">
+          <form onSubmit={handleSubmit} className="flex gap-3">
+            <input
+              type="text"
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask about advising policies, SAP, registration, transfers..."
+              className="flex-1 px-4 py-3 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              disabled={isLoading}
+            />
+            <button
+              type="submit"
+              disabled={isLoading || !input.trim()}
+              className="px-6 py-3 bg-red-600 text-white rounded-lg font-medium hover:bg-red-700 disabled:bg-gray-300 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
+            >
+              {isLoading ? (
+                <>
+                  <Loader2 className="w-5 h-5 animate-spin" />
+                  Searching
+                </>
+              ) : (
+                <>
+                  <Send className="w-5 h-5" />
+                  Ask
+                </>
+              )}
+            </button>
+          </form>
+          
+          <div className="mt-3 flex items-start gap-2 text-xs text-gray-500">
+            <AlertCircle className="w-4 h-4 flex-shrink-0 mt-0.5" />
+            <p>
+              This assistant uses official Ivy Tech advising documentation. For urgent matters, contact your advisor directly.
+              Sources: Advising policies, SAP guidelines, registration procedures, and transfer policies.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default App;
